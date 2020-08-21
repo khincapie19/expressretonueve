@@ -10,30 +10,35 @@
 
 const express = require('express');
 var mongoose = require("mongoose");
+const app = express();
 
 mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost:27017/mongo-1', { useNewUrlParser: true,
     useUnifiedTopology: true });
-mongoose.connection.on("error", function(e) { console.error(e); });
 
 var schema = mongoose.Schema({
-  _id:  { type: mongoose.Schema.Types.ObjectId, index: true, required: true, auto: true },
-  name: { type: String, default: 'Anónimo'},
+  name: String,
   count: { type: Number, default: 1 }
 });
 
 var Visitor = mongoose.model('Visitor', schema);
 
-const app = express();
+app.get('/', async(req,res) => {
+  let name = req.query.name;
+  let visitors = await Visitor.find({ name: name });
 
-app.get('/', (req,res) => {
-  Visitor.find({name: name}), function(err) {
-    return count ++
+  if ( visitors.length > 0) {
+    await Visitor.updateOne({ _id: visitors[0]._id }, { $set: { count: visitors[0].count + 1 } });
+  } else {
+    await Visitor.create({ name: name }, function(err) {
+      if (err) return console.error(err);
+    });
   }
-  Visitor.create({ name: name }, function(err) {
+  Visitor.findOne({ name: name }, function(err, visitor) {
     if (err) return console.error(err);
-  });
+    console.log( visitor)
+    })
+  })
 
-  res.send(`<h1>El visitante fue almacenado con éxito</h1>`);
 });
 
 app.listen(3000, () => console.log('Listening on port 3000!'));
