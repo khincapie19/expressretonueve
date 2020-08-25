@@ -37,11 +37,13 @@ app.get('/', async(req,res) => {
   let visitors = await Visitor.find({});
 
   let headers = `
-    <tr>
-      <th>Id</th>
-      <th>Name</th>
-      <th>Visits</th>
-    </tr>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Visits</th>
+      </tr>
+    </thead>
   `
 
   let content = ``;
@@ -60,7 +62,7 @@ app.get('/', async(req,res) => {
     content += row
   }
 
-  res.send(`<table>${headers}${content}</table>`);
+  res.send(`<table>${headers}<tbody>${content}</tbody></table>`);
 });
 
 
