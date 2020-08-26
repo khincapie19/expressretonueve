@@ -16,22 +16,20 @@ mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost:27017/mongo-1',
     useUnifiedTopology: true });
 
 var schema = mongoose.Schema({
-  name: String,
+  name: { type: String, default: "Anónimo" },
   count: { type: Number, default: 1 }
 });
 
 var Visitor = mongoose.model('Visitor', schema);
 
 app.get('/', async(req,res) => {
-  let name = req.query.name || 'Anónimo';
+  let name = req.query.name;
   let visitor = await Visitor.findOne({ name: name });
 
   if (visitor) {
     await Visitor.updateOne({ _id: visitor._id }, { $set: { count: visitor.count + 1 } });
   } else {
-    await Visitor.create({ name: name }, function(err) {
-      if (err) return console.error(err);
-    });
+    await Visitor.create({ name: name });
   }
 
   let visitors = await Visitor.find({});
